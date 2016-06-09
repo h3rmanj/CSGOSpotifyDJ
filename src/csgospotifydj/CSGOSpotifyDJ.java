@@ -18,25 +18,31 @@ public class CSGOSpotifyDJ implements HotkeyListener
         new CSGOSpotifyDJ();
     }
 
-    ExecutorService executor = Executors.newSingleThreadExecutor();
+    private JIntellitype intellitype = JIntellitype.getInstance();
 
     public CSGOSpotifyDJ ()
     {
-        JIntellitype in = JIntellitype.getInstance();
-        in.registerHotKey(1, JIntellitype.MOD_CONTROL + JIntellitype.MOD_ALT, (int)'V');
-        in.addHotKeyListener(this);
+        registerHotKey();
+        intellitype.addHotKeyListener(this);
+    }
+
+    private void registerHotKey ()
+    {
+        intellitype.registerHotKey(1, JIntellitype.MOD_CONTROL + JIntellitype.MOD_ALT, (int)'V');
     }
 
     @Override
     public void onHotKey (int i)
     {
+        intellitype.unregisterHotKey(1);
         if (i == 1)
         {
-            executor.submit(() -> {
-                String song = getCurrentSongPlaying();
-                if (song != null && song.length() > 0)
-                    printSongToCSGO(song);
-            });
+            String song = getCurrentSongPlaying();
+            if (song != null && song.length() > 0)
+                printSongToCSGO(song);
+            else
+                registerHotKey();
+
         }
     }
 
@@ -90,6 +96,8 @@ public class CSGOSpotifyDJ implements HotkeyListener
             //Send message
             robot.keyPress(KeyEvent.VK_ENTER);
             robot.keyRelease(KeyEvent.VK_ENTER);
-        } catch (AWTException e) { e.printStackTrace(); }
+        }
+        catch (AWTException e) { e.printStackTrace(); }
+        finally { registerHotKey(); }
     }
 }
