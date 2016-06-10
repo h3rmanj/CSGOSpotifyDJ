@@ -1,6 +1,5 @@
 package csgospotifydj;
 
-import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
@@ -8,10 +7,8 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.Scanner;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-public class CSGOSpotifyDJ implements HotkeyListener
+public class CSGOSpotifyDJ
 {
     public static void main (String[] args)
     {
@@ -23,29 +20,23 @@ public class CSGOSpotifyDJ implements HotkeyListener
     public CSGOSpotifyDJ ()
     {
         registerHotKey();
-        intellitype.addHotKeyListener(this);
+        intellitype.addHotKeyListener(i -> {
+            intellitype.unregisterHotKey(1);
+            if (i == 1)
+            {
+                String song = getCurrentSongPlaying();
+                if (song != null && song.length() > 0)
+                    printSongToCSGO(song);
+                else
+                    registerHotKey();
+            }
+        });
     }
 
     private void registerHotKey ()
     {
         intellitype.registerHotKey(1, JIntellitype.MOD_CONTROL + JIntellitype.MOD_ALT, (int)'V');
     }
-
-    @Override
-    public void onHotKey (int i)
-    {
-        intellitype.unregisterHotKey(1);
-        if (i == 1)
-        {
-            String song = getCurrentSongPlaying();
-            if (song != null && song.length() > 0)
-                printSongToCSGO(song);
-            else
-                registerHotKey();
-
-        }
-    }
-
     private synchronized String getCurrentSongPlaying ()
     {
         try
